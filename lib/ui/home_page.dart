@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
           child: _buildBodyContent(context),
           flex: 1,
         ),
-        _buildAddButton(),
+        _buildBottomContent(context),
       ],
     );
   }
@@ -175,66 +175,125 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildListTile({@required BuildContext context, int index}) {
     TodoItem item = _items[index];
-    return ListTile(
-      contentPadding: EdgeInsets.fromLTRB(0, 2, 0, 2),
-      leading: Checkbox(
-        onChanged: (b) {},
-        value: false,
-      ),
-      title: Text(
-        item.title,
-        style: TextStyle(
-          fontSize: 18,
+    return InkWell(
+      child: ListTile(
+        contentPadding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+        leading: Container(
+          padding: EdgeInsets.all(4),
+          decoration: BoxDecoration(
+              shape: BoxShape.circle, border: Border.all(color: Colors.grey)),
+          child: Opacity(
+            child: Icon(
+              Icons.done,
+              color: Colors.green,
+            ),
+            opacity: item.isCompleted ? 1 : 0,
+          ),
         ),
-      ),
-      trailing: IconButton(
-        icon: Icon(
-          Icons.clear,
-          color: Colors.red,
+        title: Text(
+          item.title,
+          style: item.isCompleted
+              ? TextStyle(
+                  fontSize: 22,
+                  color: Theme.of(context).disabledColor,
+                  decoration: TextDecoration.lineThrough,
+                )
+              : TextStyle(
+                  fontSize: 22,
+                ),
         ),
-        onPressed: () {},
+        trailing: IconButton(
+          icon: Icon(
+            Icons.clear,
+            color: Colors.red,
+          ),
+          onPressed: () {},
+        ),
       ),
     );
   }
 
-  Widget _buildAddButton() {
-    InputBorder border =
-        UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+  Widget _buildBottomContent(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          border:
-              Border(top: BorderSide(width: 1, color: Colors.grey.shade300))),
+          color: Colors.white,
+          boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black12)]),
+      child: Column(
+        children: <Widget>[
+          _buildListInfo(context),
+          Divider(height: 1),
+          _buildAddForm(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListInfo(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 2, 4),
       child: Row(
         children: <Widget>[
           Expanded(
             flex: 1,
-            child: Container(
-              child: TextFormField(
-                style: TextStyle(fontSize: 20),
-                decoration: InputDecoration(
-                    hintText: "What needs to be done?",
-                    border: border,
-                    enabledBorder: border,
-                    focusedBorder: border,
-                    contentPadding: EdgeInsets.fromLTRB(
-                        16, 16, 16, MediaQuery.of(context).padding.bottom)),
-              ),
+            child: Text(
+              "${_items.length} item left",
+              style: Theme.of(context)
+                  .textTheme
+                  .subhead
+                  .copyWith(color: Colors.grey),
             ),
           ),
-          Container(
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0)),
-              child: MaterialButton(
-                height: 55.0 + MediaQuery.of(context).padding.bottom,
-                minWidth: 65.0,
-                child: Icon(Icons.add, color: Colors.white),
-                color: Color(0xFFFF4954),
-                onPressed: () {},
+          ButtonTheme(
+            minWidth: 0,
+            child: FlatButton(
+              child: Text(
+                "Clear completed",
+                style: Theme.of(context)
+                    .textTheme
+                    .subhead
+                    .copyWith(color: Colors.grey),
               ),
+              onPressed: () {},
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAddForm(BuildContext context) {
+    InputBorder border =
+        UnderlineInputBorder(borderSide: BorderSide(color: Colors.transparent));
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Container(
+            child: TextFormField(
+              style: TextStyle(fontSize: 20),
+              decoration: InputDecoration(
+                  hintText: "What needs to be done?",
+                  border: border,
+                  enabledBorder: border,
+                  focusedBorder: border,
+                  contentPadding: EdgeInsets.fromLTRB(
+                      16, 16, 16, MediaQuery.of(context).padding.bottom)),
+            ),
+          ),
+        ),
+        InkWell(
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0)),
+            child: MaterialButton(
+              height: 55.0 + MediaQuery.of(context).padding.bottom,
+              minWidth: 65.0,
+              child: Icon(Icons.add, color: Colors.white),
+              color: Color(0xFFFF4954),
+              onPressed: () {},
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
