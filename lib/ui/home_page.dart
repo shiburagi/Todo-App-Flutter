@@ -230,7 +230,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildListInfo(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 2, 4),
+      padding: const EdgeInsets.fromLTRB(24, 4, 8, 4),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -277,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                   enabledBorder: border,
                   focusedBorder: border,
                   contentPadding: EdgeInsets.fromLTRB(
-                      16, 16, 16, MediaQuery.of(context).padding.bottom)),
+                      24, 16, 16, MediaQuery.of(context).padding.bottom)),
             ),
           ),
         ),
