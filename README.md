@@ -7,7 +7,7 @@ A sample UI for todo app developed in flutter
 - Delete task
 - check & uncheck task
 - delete all completed task
-- filter
+- filter (All, Active, Completed)
 
 ## Demo
 
