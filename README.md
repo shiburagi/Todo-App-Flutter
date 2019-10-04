@@ -2,10 +2,17 @@
 
 A sample UI for todo app developed in flutter
 
+## Task
+- Add new task
+- Delete task
+- check & uncheck task
+- delete all completed task
+- filter (All, Active, Completed)
+
 ## Demo
 
 <p>
-  <img src="images/todo-app-screenshot.jpg" width="350">
+  <img src="Screenshot_1570188458.png" width="350">
 </p>
 
 # Todo-App-Flutter
