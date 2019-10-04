@@ -12,27 +12,41 @@ class _HomePageState extends State<HomePage> {
     TodoItem(title: "Sleep"),
   ];
 
+  TextEditingController _titleController;
+  bool _filter;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildBody(context),
-    );
+  void initState() {
+    _titleController = TextEditingController();
+    super.initState();
   }
 
-  Widget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 12.0),
-          child: Icon(
-            Icons.menu,
-            color: Color(0xFF433D82),
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isLightMode = true;
+    return Scaffold(
+      body: _buildBody(context),
+      endDrawer: Drawer(
+        child: Container(
+          child: ListView(
+            children: <Widget>[
+              InkWell(
+                child: ListTile(
+                  trailing: Icon(
+                      isLightMode ? Icons.brightness_2 : Icons.brightness_high),
+                  title: Text(isLightMode ? "Dark" : "Light"),
+                ),
+              ),
+            ],
           ),
-        )
-      ],
+        ),
+      ),
     );
   }
 
@@ -40,7 +54,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: <Widget>[
         Expanded(
-          child: _buildBodyContent(context),
+          child: _buildNestedView(context),
           flex: 1,
         ),
         _buildBottomContent(context),
@@ -48,22 +62,62 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildNestedView(BuildContext context) {
+    return SafeArea(
+      child: NestedScrollView(
+        headerSliverBuilder: _buildAppBar,
+        body: _buildBodyContent(context),
+      ),
+    );
+  }
+
+  List<Widget> _buildAppBar(BuildContext context, bool innerBoxIsScrolled) {
+    return <Widget>[
+      SliverAppBar(
+        expandedHeight: 180.0,
+        automaticallyImplyLeading: false,
+        iconTheme: IconThemeData(color: Color(0xFF433D82)),
+        floating: false,
+        elevation: 0,
+        pinned: true,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: FlexibleSpaceBar(
+          collapseMode: CollapseMode.pin,
+          centerTitle: true,
+          title: Text(""),
+          background: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 56, 16, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _buildHelloWidget(context: context, name: 'Human'),
+                  ),
+                  SizedBox(height: 5.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _buildDateWidget(context: context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
   Widget _buildBodyContent(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: _buildHelloWidget(context: context, name: 'Human'),
-          ),
-          SizedBox(height: 5.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: _buildDateWidget(context: context),
-          ),
-          SizedBox(height: 20.0),
+          // SizedBox(height: 20.0),
           Divider(height: 1),
           SizedBox(height: 4.0),
           Padding(
@@ -128,12 +182,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTaskTypesWidget({@required BuildContext context}) {
-    return Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-      _buildToggleButton(
-          context: context, text: "All", onPressed: () {}, focus: true),
-      _buildToggleButton(context: context, text: "Active", onPressed: () {}),
-      _buildToggleButton(context: context, text: "Completed", onPressed: () {}),
-    ]);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        _buildToggleButton(
+          context: context,
+          text: "All",
+          onPressed: () {},
+          focus: _filter == null,
+        ),
+        _buildToggleButton(
+          context: context,
+          text: "Active",
+          onPressed: () {},
+          focus: _filter == true,
+        ),
+        _buildToggleButton(
+          context: context,
+          text: "Completed",
+          onPressed: () {},
+          focus: _filter == false,
+        ),
+      ],
+    );
   }
 
   Widget _buildToggleButton(
@@ -159,6 +230,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildListView(BuildContext context) {
+    List<TodoItem> _items = this
+        ._items
+        .where(
+          (item) => item.isCompleted != _filter,
+        )
+        .toList();
     return Flexible(
       child: ListView.builder(
         padding: EdgeInsets.all(0),
@@ -166,16 +243,17 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, i) {
           return _buildListTile(
             context: context,
-            index: i,
+            item: _items[i],
           );
         },
       ),
     );
   }
 
-  Widget _buildListTile({@required BuildContext context, int index}) {
-    TodoItem item = _items[index];
+  Widget _buildListTile({@required BuildContext context, TodoItem item}) {
     return InkWell(
+      onTap: () {
+      },
       child: ListTile(
         contentPadding: EdgeInsets.fromLTRB(0, 2, 0, 2),
         leading: Container(
@@ -207,7 +285,8 @@ class _HomePageState extends State<HomePage> {
             Icons.clear,
             color: Colors.red,
           ),
-          onPressed: () {},
+          onPressed: () {
+          },
         ),
       ),
     );
@@ -216,7 +295,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildBottomContent(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black12)]),
       child: Column(
         children: <Widget>[
@@ -229,6 +308,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildListInfo(BuildContext context) {
+    int activeCount = _items.length;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 4, 8, 4),
       child: Row(
@@ -236,7 +316,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             flex: 1,
             child: Text(
-              "${_items.length} item left",
+              "$activeCount item${activeCount > 1 ? "s" : ""} left",
               style: Theme.of(context)
                   .textTheme
                   .subhead
@@ -253,7 +333,9 @@ class _HomePageState extends State<HomePage> {
                     .subhead
                     .copyWith(color: Colors.grey),
               ),
-              onPressed: () {},
+              onPressed: () {
+               
+              },
             ),
           ),
         ],
@@ -270,6 +352,7 @@ class _HomePageState extends State<HomePage> {
           flex: 1,
           child: Container(
             child: TextFormField(
+              controller: _titleController,
               style: TextStyle(fontSize: 20),
               decoration: InputDecoration(
                   hintText: "What needs to be done?",
@@ -277,25 +360,24 @@ class _HomePageState extends State<HomePage> {
                   enabledBorder: border,
                   focusedBorder: border,
                   contentPadding: EdgeInsets.fromLTRB(
-                      24, 16, 16, MediaQuery.of(context).padding.bottom)),
+                      24, 4, 16, MediaQuery.of(context).padding.bottom)),
             ),
           ),
         ),
-        InkWell(
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0)),
-            child: MaterialButton(
-              height: 55.0 + MediaQuery.of(context).padding.bottom,
-              minWidth: 65.0,
-              child: Icon(Icons.add, color: Colors.white),
-              color: Color(0xFFFF4954),
-              onPressed: () {},
-            ),
+        ClipRRect(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(25.0)),
+          child: MaterialButton(
+            height: 75.0 + MediaQuery.of(context).padding.bottom,
+            minWidth: 65.0,
+            child: Icon(Icons.add, color: Colors.white),
+            color: Color(0xFFFF4954),
+            onPressed: (){},
           ),
         ),
       ],
     );
   }
+
 }
 
 class TodoItem {
