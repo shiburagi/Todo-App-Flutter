@@ -3,11 +3,12 @@
 A sample UI for todo app developed in flutter
 
 ## Task
-- Add new task
-- Delete task
-- check & uncheck task
-- delete all completed task
-- filter (All, Active, Completed)
+- Add new todo
+- Delete todo
+- Check & uncheck todo
+- Delete all completed todo
+- Display correct active todo still left 
+- Filter (All, Active, Completed)
 
 ## Demo
 
